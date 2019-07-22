@@ -249,4 +249,169 @@ public class WriteToExcel {
         return style;
     }
 
+    public static HSSFWorkbook writeToExcelNew(List<List<String>> allCaseList, String xmindFolderPath) {
+
+        int caseCount = 0;
+
+        // 第一步：创建Excel工作簿对象
+        HSSFWorkbook workbook = new HSSFWorkbook();
+
+        // 第二步：创建工作表
+        HSSFSheet sheet = workbook.createSheet("测试用例");
+
+        // 第三步：在sheet中添加表头第0行
+        HSSFRow row = sheet.createRow(0);
+
+        int testCasePathCol = 1;
+        int testCaseNameCol = 2;
+        int testCaseDescCol = 3;
+        int executeDurationCol = 4;
+        int testStepCol = 5;
+        int expectionCol = 6;
+
+        // 第四步:声明列对象
+        HSSFCell cell1 = row.createCell(testCasePathCol - 1);
+        HSSFCell cell2 = row.createCell(testCaseNameCol - 1);
+        HSSFCell cell3 = row.createCell(testCaseDescCol - 1);
+        HSSFCell cell4 = row.createCell(executeDurationCol - 1);
+        HSSFCell cell5 = row.createCell(testStepCol - 1);
+        HSSFCell cell6 = row.createCell(expectionCol - 1);
+
+        cell1.setCellValue("测试案例路径");
+        cell2.setCellValue("测试案例名称");
+        cell3.setCellValue("测试内容及重点");
+        cell4.setCellValue("步骤编号");
+        cell5.setCellValue("步骤描述");
+        cell6.setCellValue("预期结果/检查点");
+
+
+        // 设置表头样式
+        HSSFCellStyle styleHead = workbook.createCellStyle();
+        // 设置表头字体
+        HSSFFont fontHead = workbook.createFont();
+
+        cell1.setCellStyle(getHeadStyle(styleHead, fontHead));
+        cell2.setCellStyle(getHeadStyle(styleHead, fontHead));
+        cell3.setCellStyle(getHeadStyle(styleHead, fontHead));
+        cell4.setCellStyle(getHeadStyle(styleHead, fontHead));
+        cell5.setCellStyle(getHeadStyle(styleHead, fontHead));
+        cell6.setCellStyle(getHeadStyle(styleHead, fontHead));
+
+        // 设置列宽
+        sheet.setColumnWidth(testCasePathCol - 1, 15 * 256);
+        sheet.setColumnWidth(testCaseNameCol - 1, 30 * 256);
+        sheet.setColumnWidth(testCaseDescCol - 1, 30 * 256);
+        sheet.setColumnWidth(executeDurationCol - 1, 20 * 256);
+        sheet.setColumnWidth(testStepCol - 1, 60 * 256);
+        sheet.setColumnWidth(expectionCol - 1, 30 * 256);
+
+        int caseNameIndex4Xml = 3;
+        // 设置单元格样式
+        HSSFCellStyle style = workbook.createCellStyle();
+        // 设置单元格字体
+        HSSFFont font = workbook.createFont();
+        // 存储之前一个案例的名字，如果一样表示是同一个案例
+        String preCase = "";
+
+
+
+        // 遍历所有case集合
+        for (int i = 0; i < allCaseList.size(); i++) {
+            int stepNum = 1;
+//            System.out.println("-------------------");
+//            System.out.println("Row: " + String.valueOf(i));
+            // 创建用例内容的行，表头为第0行，因此真正的内容从i+1行开始
+            row = sheet.createRow(i + 1);
+
+            // 第一列为测试用例的路径
+            HSSFCell cellTestCasePath = row.createCell(testCasePathCol - 1);
+
+            // 取出单条用例
+            List<String> caseList = allCaseList.get(i);
+            String caseName = caseList.get(caseNameIndex4Xml);
+            if (preCase.equals(caseName)) {
+                cellTestCasePath.setCellValue("");
+                stepNum++;
+            } else {
+                caseCount ++;
+                cellTestCasePath.setCellValue("TestCasePath");
+            }
+            cellTestCasePath.setCellStyle(getCellStyle(style, font));
+
+            // 取出每一个用例小步骤
+            for (int j = 1; j < caseList.size(); j++) {
+//                System.out.println("Column: " + String.valueOf(j));
+                if (j <= 4) {
+                    // 路径为第0列，因此用例其他信息从j+1列开始，按照顺序把前四个列写入
+                    HSSFCell cell = row.createCell(j);
+                    // 测试用例名和测试用例描述，保持一致，如果和上一个用例名一样，就留空
+                    if (j == 1 || j == 2) {
+//                        System.out.println("preCase:" + preCase + " nowCase:" + caseName);
+                        if (preCase.equals(caseName)) {
+                            cell.setCellValue("");
+
+                        } else {
+                            cell.setCellValue(caseName);
+                            if (j == 2) {
+                                preCase = caseName;
+                            }
+                        }
+                    } else if (j == 3) {  // 执行工时这一行，留空
+                        cell.setCellValue(String.valueOf(stepNum));
+                    } else {    // 测试步骤列
+                        cell.setCellValue(caseList.get(j));
+                    }
+                    cell.setCellStyle(getCellStyle(style, font));
+
+                }
+
+                // 获取定位元素 预期结果 的下标,如果没有，则expect = -1
+//                int expect = caseList.indexOf("预期结果");
+//                if (expect != -1) {
+//                // 填写预期结果
+//
+//                    HSSFCell cellExp = row.createCell(expectionCol - 1);
+//                    cellExp.setCellValue(caseList.get(expect + 1));
+//                    cellExp.setCellStyle(getCellStyle(style, font));
+//                }
+
+                if (caseList.size() >=6) {
+                    // 填写预期结果
+
+                    HSSFCell cellExp = row.createCell(expectionCol - 1);
+                    cellExp.setCellValue(caseList.get(5));
+                    cellExp.setCellStyle(getCellStyle(style, font));
+
+                }
+
+            }
+        }
+
+        FileOutputStream out;
+
+        try {
+            // 生成文件路径: 当前目录
+            String filePath = xmindFolderPath;
+            // 文件名
+            String fileName = allCaseList.get(0).get(0) + "Case.xls";
+
+            // 生成excel文件
+            out = new FileOutputStream(filePath + "/" + fileName);
+            workbook.write(out);
+
+            System.out.println("Transfer done！Path：" + filePath + "/" + fileName);
+            out.close();
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("Total case number is: "+ String.valueOf(caseCount));
+
+        return workbook;
+
+    }
+
 }

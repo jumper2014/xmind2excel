@@ -29,7 +29,8 @@ public class Main {
             List<List<String>> allCaseList = ReadXml.readXml(xmindFolderPath);
 
             // 通过调用writeToExcel方法写入Excel
-            WriteToExcel.writeToExcel(allCaseList, xmindFolderPath);
+//            WriteToExcel.writeToExcel(allCaseList, xmindFolderPath);
+            WriteToExcel.writeToExcelNew(allCaseList, xmindFolderPath);
         } catch (Exception e) {
             e.printStackTrace();
         }
