@@ -141,12 +141,22 @@ public class WriteToExcel {
                 }
 
                 // 获取定位元素 预期结果 的下标,如果没有，则expect = -1
-                int expect = caseList.indexOf("预期结果");
-                // 填写预期结果
-                if (expect != -1) {
+//                int expect = caseList.indexOf("预期结果");
+//                if (expect != -1) {
+//                // 填写预期结果
+//
+//                    HSSFCell cellExp = row.createCell(expectionCol - 1);
+//                    cellExp.setCellValue(caseList.get(expect + 1));
+//                    cellExp.setCellStyle(getCellStyle(style, font));
+//                }
+
+                if (caseList.size() >=6) {
+                    // 填写预期结果
+
                     HSSFCell cellExp = row.createCell(expectionCol - 1);
-                    cellExp.setCellValue(caseList.get(expect + 1));
+                    cellExp.setCellValue(caseList.get(5));
                     cellExp.setCellStyle(getCellStyle(style, font));
+
                 }
 
             }
@@ -164,7 +174,7 @@ public class WriteToExcel {
             out = new FileOutputStream(filePath + "/" + fileName);
             workbook.write(out);
 
-            System.out.println("Transfer done！Path：" + filePath + fileName);
+            System.out.println("Transfer done！Path：" + filePath + "/" + fileName);
             out.close();
 
         } catch (FileNotFoundException e) {
